@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+  api:
+    build: .
+    ports:
+      - "56961:56961"
+    env_file:
+      - .env_d3b2dbc6-eb80-47a1-8fc6-6d72dad7f2f6
