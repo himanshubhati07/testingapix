@@ -7,10 +7,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-load_dotenv('.env_d3b2dbc6-eb80-47a1-8fc6-6d72dad7f2f6', override=True)
+load_dotenv('.env_a4e50816-c0d7-4dbd-b614-aed2c21ff7c2', override=True)
 
 from app.database import get_db
-from app.models import Employee, SalaryRecord, SalaryConfig
+from app.models import Employee, SalaryRecord, SalaryConfig, WelfareFundConfig, WelfareFundType
 from app.schemas import SalaryGenerateRequest, SalaryRecordOut, SalaryUpdateRequest, SalarySlipOut
 
 router = APIRouter(prefix="/salaries", tags=["salaries"])
@@ -31,6 +31,17 @@ async def _get_config(db: AsyncSession) -> SalaryConfig:
     return config
 
 
+async def _get_welfare_config(db: AsyncSession) -> WelfareFundConfig:
+    result = await db.execute(select(WelfareFundConfig).where(WelfareFundConfig.is_active.is_(True)))
+    config = result.scalar_one_or_none()
+    if not config:
+        config = WelfareFundConfig(deduction_type=WelfareFundType.amount, deduction_value=0.0, is_active=True)
+        db.add(config)
+        await db.commit()
+        await db.refresh(config)
+    return config
+
+
 def _calculate_deductions(employee: Employee, config: SalaryConfig, gross: float):
     pf_employee = pf_employer = esi_employee = esi_employer = 0.0
     if employee.pf_eligible:
@@ -40,6 +51,15 @@ def _calculate_deductions(employee: Employee, config: SalaryConfig, gross: float
         esi_employee = _round(gross * float(config.esi_employee_rate))
         esi_employer = _round(gross * float(config.esi_employer_rate))
     return pf_employee, pf_employer, esi_employee, esi_employer
+
+
+def _calculate_welfare_fund(employee: Employee, config: WelfareFundConfig, gross: float) -> float:
+    if not employee.welfare_fund_eligible or not config.is_active:
+        return 0.0
+    value = float(config.deduction_value)
+    if config.deduction_type == WelfareFundType.percentage:
+        return _round(gross * value)
+    return _round(value)
 
 
 @router.post("/generate", response_model=SalaryRecordOut, status_code=201)
@@ -59,10 +79,12 @@ async def generate_salary(payload: SalaryGenerateRequest, db: AsyncSession = Dep
         raise HTTPException(status_code=409, detail="Salary record already exists for this month")
 
     config = await _get_config(db)
+    welfare_config = await _get_welfare_config(db)
     gross = float(employee.gross_salary)
     pf_employee, pf_employer, esi_employee, esi_employer = _calculate_deductions(employee, config, gross)
+    welfare_fund_deduction = _calculate_welfare_fund(employee, welfare_config, gross)
     other_deductions = _round(payload.other_deductions)
-    net_salary = _round(gross - pf_employee - esi_employee - other_deductions)
+    net_salary = _round(gross - pf_employee - esi_employee - welfare_fund_deduction - other_deductions)
 
     record = SalaryRecord(
         employee_id=employee.id,
@@ -72,6 +94,7 @@ async def generate_salary(payload: SalaryGenerateRequest, db: AsyncSession = Dep
         pf_employer=pf_employer,
         esi_employee=esi_employee,
         esi_employer=esi_employer,
+        welfare_fund_deduction=welfare_fund_deduction,
         other_deductions=other_deductions,
         net_salary=net_salary,
     )
@@ -121,7 +144,13 @@ async def update_salary(salary_id: int, payload: SalaryUpdateRequest, db: AsyncS
         raise HTTPException(status_code=404, detail="Salary record not found")
     if payload.other_deductions is not None:
         record.other_deductions = _round(payload.other_deductions)
-    record.net_salary = _round(float(record.gross_salary) - float(record.pf_employee) - float(record.esi_employee) - float(record.other_deductions))
+    record.net_salary = _round(
+        float(record.gross_salary)
+        - float(record.pf_employee)
+        - float(record.esi_employee)
+        - float(record.welfare_fund_deduction)
+        - float(record.other_deductions)
+    )
     await db.commit()
     await db.refresh(record)
     return record
@@ -150,6 +179,7 @@ async def download_salary_slip(salary_id: int, db: AsyncSession = Depends(get_db
         f"Gross: {record.gross_salary}\n"
         f"PF Employee: {record.pf_employee}\n"
         f"ESI Employee: {record.esi_employee}\n"
+        f"Welfare Fund: {record.welfare_fund_deduction}\n"
         f"Other Deductions: {record.other_deductions}\n"
         f"Net Salary: {record.net_salary}\n"
     )

@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from jose import jwt
 from passlib.context import CryptContext
 
-load_dotenv('.env_d3b2dbc6-eb80-47a1-8fc6-6d72dad7f2f6', override=True)
+load_dotenv('.env_a4e50816-c0d7-4dbd-b614-aed2c21ff7c2', override=True)
 
 SECRET_KEY = os.getenv("SECRET_KEY", "change_this_secret_key")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")

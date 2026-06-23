@@ -6,7 +6,7 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
-load_dotenv('.env_d3b2dbc6-eb80-47a1-8fc6-6d72dad7f2f6', override=True)
+load_dotenv('.env_a4e50816-c0d7-4dbd-b614-aed2c21ff7c2', override=True)
 
 from app.database import get_db
 from app.models import Employee
@@ -61,14 +61,3 @@ async def update_employee(employee_id: int, payload: EmployeeUpdate, db: AsyncSe
         raise HTTPException(status_code=409, detail="Duplicate employee record") from exc
     await db.refresh(employee)
     return employee
-
-
-@router.delete("/{employee_id}", status_code=204)
-async def delete_employee(employee_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Employee).where(Employee.id == employee_id))
-    employee = result.scalar_one_or_none()
-    if not employee:
-        raise HTTPException(status_code=404, detail="Employee not found")
-    await db.delete(employee)
-    await db.commit()
-    return None

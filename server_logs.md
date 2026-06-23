@@ -1,68 +1,71 @@
 # Server Logs [Iteration 0]
 
-## Platform — OS + python version
+## Platform - OS + python version
 - OS: linux
 - Python: 3.11.2
 
 ## Database
-- Client URL  : postgresql+asyncpg://myuser:mypassword@localhost:5432/gen_6511e82291
-- Fallback    : YES — substituted (original unreachable). DB name: gen_6511e82291. Log in server_logs.md.
-- Resolved URL: postgresql+asyncpg://myuser:mypassword@localhost:5432/gen_6511e82291
+- Original URLs : postgresql+asyncpg://myuser:mypassword@localhost:5432/gen_6511e82291
+- Resolved URLs : postgresql+asyncpg://myuser:mypassword@localhost:5432/gen_6511e82291
+- Env file      : .env_a4e50816-c0d7-4dbd-b614-aed2c21ff7c2
 
-## Test Runner — no live server needed
-- pytest tests/ -v --tb=short  (tests use ASGI transport / TestClient — no HTTP server required)
+## Start Script - which script was used
+- start.sh (PORT=45783)
 
 ## Files Generated / Modified
-- /app/__init__.py — OK
-- /app/database.py — OK
-- /app/models.py — OK
-- /app/schemas.py — OK
-- /app/core/__init__.py — OK
-- /app/core/security.py — OK
-- /app/core/auth.py — OK
-- /app/routers/__init__.py — OK
-- /app/routers/auth.py — OK
-- /app/routers/employees.py — OK
-- /app/routers/salaries.py — OK
-- /app/routers/reports.py — OK
-- /app/main.py — OK
-- /seed.py — OK
-- /requirements.txt — OK
-- /.env_d3b2dbc6-eb80-47a1-8fc6-6d72dad7f2f6 — OK
-- /start.sh — OK
-- /start.bat — OK
-- /Dockerfile — OK
-- /docker-compose.yml — OK
-- /Makefile — OK
-- /README.md — OK
-- /pytest.ini — OK
-- /tests/__init__.py — OK
-- /tests/conftest.py — OK
-- /tests/test_auth.py — OK
-- /tests/test_employees.py — OK
-- /tests/test_salaries.py — OK
-- /tests/test_reports.py — OK
-- /tests/utils/__init__.py — OK
-- /tests/utils/factories.py — OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/.env_a4e50816-c0d7-4dbd-b614-aed2c21ff7c2 - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/start.sh - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/app/main.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/app/models.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/app/schemas.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/app/routers/employees.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/app/routers/salaries.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/app/routers/reports.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/app/routers/welfare_fund.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/app/database.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/app/core/auth.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/app/core/security.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/tests/conftest.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/tests/test_employees.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/tests/test_reports.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/tests/test_salaries.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/tests/test_welfare_fund.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/tests/utils/factories.py - OK
+- /home/ryzen/fast_api_generator_backend/outputs/a4e50816-c0d7-4dbd-b614-aed2c21ff7c2/seed.py - OK
 
 ## API Test Results
 
-| Test Function | Endpoint | Status | Expected Code | Notes |
+| Method | Path | Status | HTTP Code | Notes |
 |---|---|---:|---:|---|
-| test_register | POST /api/v1/auth/register | PASSED | 201 | User registration |
-| test_login_valid | POST /api/v1/auth/login | PASSED | 200 | Valid login |
-| test_me_and_invalid_token | GET /api/v1/auth/me | PASSED | 200 | Invalid token returns 401 |
-| test_create_employee | POST /api/v1/employees | PASSED | 201 | Create employee |
-| test_list_employees | GET /api/v1/employees | PASSED | 200 | List employees |
-| test_get_update_delete_employee | GET/PUT/DELETE /api/v1/employees/{id} | PASSED | 200/204 | CRUD employee |
-| test_employee_limit_validation | POST /api/v1/employees | PASSED | 422 | Enforces max 10 employees |
-| test_generate_salary_and_calculation | POST /api/v1/salaries/generate | PASSED | 201 | PF/ESI/net salary |
-| test_list_and_get_salary | GET /api/v1/salaries, GET /api/v1/salaries/{id} | PASSED | 200 | List/get salaries |
-| test_update_salary_and_slip_download | PUT/GET /api/v1/salaries/{id}/* | PASSED | 200 | Update/slip/download |
-| test_reports_endpoints | GET /api/v1/reports/* | PASSED | 200 | Reporting endpoints |
+| GET | /health | PASSED | 200 | Health check OK |
+| POST | /api/v1/auth/register | PASSED | 201 | User registration |
+| POST | /api/v1/auth/login | PASSED | 200 | User login |
+| GET | /api/v1/auth/me | PASSED | 200 | Authenticated user |
+| POST | /api/v1/employees | PASSED | 201 | Create employee |
+| GET | /api/v1/employees | PASSED | 200 | List employees |
+| GET | /api/v1/employees/{id} | PASSED | 200 | Get employee |
+| PUT | /api/v1/employees/{id} | PASSED | 200 | Update employee + inactive status |
+| POST | /api/v1/salaries/generate | PASSED | 201 | Generate salary |
+| GET | /api/v1/salaries | PASSED | 200 | List salaries |
+| GET | /api/v1/salaries/{id} | PASSED | 200 | Get salary |
+| PUT | /api/v1/salaries/{id} | PASSED | 200 | Update salary |
+| GET | /api/v1/salaries/{id}/slip | PASSED | 200 | Salary slip |
+| GET | /api/v1/salaries/{id}/download | PASSED | 200 | Salary slip download |
+| GET | /api/v1/reports/total-salary-paid | PASSED | 200 | Salary totals |
+| GET | /api/v1/reports/monthly-payroll-summary | PASSED | 200 | Monthly payroll summary |
+| GET | /api/v1/reports/employee-salary-report/{id} | PASSED | 200 | Employee report |
+| POST | /api/v1/welfare-fund/config | PASSED | 201 | Create welfare config |
+| PUT | /api/v1/welfare-fund/config/{id} | PASSED | 200 | Update welfare config |
+| GET | /api/v1/welfare-fund/config | PASSED | 200 | Get welfare config |
+| POST | /api/v1/welfare-fund/calculate | PASSED | 200 | Calculate welfare deduction |
+| GET | /api/v1/welfare-fund/employee/{id} | PASSED | 200 | Employee welfare details |
+| GET | /api/v1/welfare-fund/report | PASSED | 200 | Welfare fund report |
+| GET | /api/v1/welfare-fund/monthly-summary | PASSED | 200 | Monthly welfare summary |
 
 ## Errors Fixed This Iteration
-1. /tests/conftest.py → event loop mismatch in teardown → aligned loop scope + cleared tables per test.
-2. /pytest.ini → added asyncio_default_test_loop_scope=session to align loops.
+1. start.sh -> hardcoded port 56961 -> updated to 45783 for required port
+2. tests/conftest.py/app/main.py -> missing welfare fund columns in existing DB -> added ALTER TABLE migrations before usage
 
 ## Still Failing
+- None
+
