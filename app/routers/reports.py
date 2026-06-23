@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-load_dotenv('.env_d3b2dbc6-eb80-47a1-8fc6-6d72dad7f2f6', override=True)
+load_dotenv('.env_a4e50816-c0d7-4dbd-b614-aed2c21ff7c2', override=True)
 
 from app.database import get_db
 from app.models import SalaryRecord, Employee
@@ -21,47 +21,15 @@ async def total_salary_paid(db: AsyncSession = Depends(get_db)):
             func.coalesce(func.sum(SalaryRecord.net_salary), 0),
             func.coalesce(func.sum(SalaryRecord.pf_employee), 0),
             func.coalesce(func.sum(SalaryRecord.esi_employee), 0),
+            func.coalesce(func.sum(SalaryRecord.welfare_fund_deduction), 0),
         )
     )
-    total_salary, total_pf, total_esi = result.first()
+    total_salary, total_pf, total_esi, total_welfare = result.first()
     return {
         "total_salary_paid": float(total_salary),
         "total_pf_deducted": float(total_pf),
         "total_esi_deducted": float(total_esi),
-    }
-
-
-@router.get("/total-pf-deducted", response_model=SalaryReportOut)
-async def total_pf_deducted(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(
-        select(
-            func.coalesce(func.sum(SalaryRecord.net_salary), 0),
-            func.coalesce(func.sum(SalaryRecord.pf_employee), 0),
-            func.coalesce(func.sum(SalaryRecord.esi_employee), 0),
-        )
-    )
-    total_salary, total_pf, total_esi = result.first()
-    return {
-        "total_salary_paid": float(total_salary),
-        "total_pf_deducted": float(total_pf),
-        "total_esi_deducted": float(total_esi),
-    }
-
-
-@router.get("/total-esi-deducted", response_model=SalaryReportOut)
-async def total_esi_deducted(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(
-        select(
-            func.coalesce(func.sum(SalaryRecord.net_salary), 0),
-            func.coalesce(func.sum(SalaryRecord.pf_employee), 0),
-            func.coalesce(func.sum(SalaryRecord.esi_employee), 0),
-        )
-    )
-    total_salary, total_pf, total_esi = result.first()
-    return {
-        "total_salary_paid": float(total_salary),
-        "total_pf_deducted": float(total_pf),
-        "total_esi_deducted": float(total_esi),
+        "total_welfare_fund_deducted": float(total_welfare),
     }
 
 
@@ -74,10 +42,11 @@ async def monthly_payroll_summary(db: AsyncSession = Depends(get_db)):
             func.coalesce(func.sum(SalaryRecord.net_salary), 0),
             func.coalesce(func.sum(SalaryRecord.pf_employee), 0),
             func.coalesce(func.sum(SalaryRecord.esi_employee), 0),
+            func.coalesce(func.sum(SalaryRecord.welfare_fund_deduction), 0),
         ).group_by(SalaryRecord.salary_month)
     )
     summaries = []
-    for month, count, total_salary, total_pf, total_esi in result.all():
+    for month, count, total_salary, total_pf, total_esi, total_welfare in result.all():
         summaries.append(
             {
                 "month": month.strftime("%Y-%m"),
@@ -85,6 +54,7 @@ async def monthly_payroll_summary(db: AsyncSession = Depends(get_db)):
                 "total_salary_paid": float(total_salary),
                 "total_pf_deducted": float(total_pf),
                 "total_esi_deducted": float(total_esi),
+                "total_welfare_fund_deducted": float(total_welfare),
             }
         )
     return summaries
@@ -101,11 +71,13 @@ async def employee_salary_report(employee_id: int, db: AsyncSession = Depends(ge
     total_paid = sum(float(r.net_salary) for r in records)
     total_pf = sum(float(r.pf_employee) for r in records)
     total_esi = sum(float(r.esi_employee) for r in records)
+    total_welfare = sum(float(r.welfare_fund_deduction) for r in records)
     return {
         "employee_id": employee.id,
         "employee_name": employee.full_name,
         "total_paid": total_paid,
         "total_pf": total_pf,
         "total_esi": total_esi,
+        "total_welfare_fund": total_welfare,
         "records": records,
     }

@@ -16,18 +16,19 @@ async def test_list_employees(client: AsyncClient):
     assert isinstance(response.json(), list)
 
 
-async def test_get_update_delete_employee(client: AsyncClient):
+async def test_get_update_employee(client: AsyncClient):
     create_resp = await client.post("/api/v1/employees", json=employee_payload(3))
     employee_id = create_resp.json()["id"]
     get_resp = await client.get(f"/api/v1/employees/{employee_id}")
     assert get_resp.status_code == 200
 
-    update_resp = await client.put(f"/api/v1/employees/{employee_id}", json={"department": "HR"})
+    update_resp = await client.put(
+        f"/api/v1/employees/{employee_id}",
+        json={"department": "HR", "status": "Inactive"},
+    )
     assert update_resp.status_code == 200
     assert update_resp.json()["department"] == "HR"
-
-    delete_resp = await client.delete(f"/api/v1/employees/{employee_id}")
-    assert delete_resp.status_code == 204
+    assert update_resp.json()["status"] == "Inactive"
 
 
 async def test_employee_limit_validation(client: AsyncClient):

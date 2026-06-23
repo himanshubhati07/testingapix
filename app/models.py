@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from sqlalchemy import String, DateTime, Date, Integer, Boolean, ForeignKey, UniqueConstraint, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-load_dotenv('.env_d3b2dbc6-eb80-47a1-8fc6-6d72dad7f2f6', override=True)
+load_dotenv('.env_a4e50816-c0d7-4dbd-b614-aed2c21ff7c2', override=True)
 
 from app.database import Base
 
@@ -14,6 +14,11 @@ from app.database import Base
 class EmployeeStatus(str, Enum):
     active = "Active"
     inactive = "Inactive"
+
+
+class WelfareFundType(str, Enum):
+    amount = "amount"
+    percentage = "percentage"
 
 
 class User(Base):
@@ -45,6 +50,7 @@ class Employee(Base):
     gross_salary: Mapped[float] = mapped_column(Numeric(12, 2), default=50000.0)
     pf_eligible: Mapped[bool] = mapped_column(Boolean, default=True)
     esi_eligible: Mapped[bool] = mapped_column(Boolean, default=True)
+    welfare_fund_eligible: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     salaries: Mapped[list["SalaryRecord"]] = relationship("SalaryRecord", back_populates="employee")
@@ -62,6 +68,16 @@ class SalaryConfig(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
+class WelfareFundConfig(Base):
+    __tablename__ = "welfare_fund_configs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    deduction_type: Mapped[str] = mapped_column(String(20), default=WelfareFundType.amount)
+    deduction_value: Mapped[float] = mapped_column(Numeric(12, 4), default=0.0)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
 class SalaryRecord(Base):
     __tablename__ = "salary_records"
     __table_args__ = (
@@ -76,6 +92,7 @@ class SalaryRecord(Base):
     pf_employer: Mapped[float] = mapped_column(Numeric(12, 2), default=0)
     esi_employee: Mapped[float] = mapped_column(Numeric(12, 2), default=0)
     esi_employer: Mapped[float] = mapped_column(Numeric(12, 2), default=0)
+    welfare_fund_deduction: Mapped[float] = mapped_column(Numeric(12, 2), default=0)
     other_deductions: Mapped[float] = mapped_column(Numeric(12, 2), default=0)
     net_salary: Mapped[float] = mapped_column(Numeric(12, 2))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

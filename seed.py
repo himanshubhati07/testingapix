@@ -6,10 +6,10 @@ from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-load_dotenv('.env_d3b2dbc6-eb80-47a1-8fc6-6d72dad7f2f6', override=True)
+load_dotenv('.env_a4e50816-c0d7-4dbd-b614-aed2c21ff7c2', override=True)
 
 from app.database import engine, SessionLocal, Base
-from app.models import Employee, SalaryConfig, SalaryRecord
+from app.models import Employee, SalaryConfig, SalaryRecord, WelfareFundConfig
 
 
 async def seed_data():
@@ -20,6 +20,11 @@ async def seed_data():
         result = await session.execute(select(SalaryConfig))
         if not result.scalar_one_or_none():
             session.add(SalaryConfig())
+            await session.commit()
+
+        result = await session.execute(select(WelfareFundConfig))
+        if not result.scalar_one_or_none():
+            session.add(WelfareFundConfig(deduction_type="amount", deduction_value=500, is_active=True))
             await session.commit()
 
         result = await session.execute(select(Employee))
@@ -67,8 +72,9 @@ async def seed_data():
                         pf_employer=6000,
                         esi_employee=0,
                         esi_employer=0,
+                        welfare_fund_deduction=500,
                         other_deductions=0,
-                        net_salary=44000,
+                        net_salary=43500,
                     )
                 )
             await session.commit()

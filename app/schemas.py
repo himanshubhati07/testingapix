@@ -5,7 +5,7 @@ from typing import Optional, List
 from dotenv import load_dotenv
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
-load_dotenv('.env_d3b2dbc6-eb80-47a1-8fc6-6d72dad7f2f6', override=True)
+load_dotenv('.env_a4e50816-c0d7-4dbd-b614-aed2c21ff7c2', override=True)
 
 
 class Token(BaseModel):
@@ -41,6 +41,7 @@ class EmployeeBase(BaseModel):
     status: str = "Active"
     pf_eligible: bool = True
     esi_eligible: bool = True
+    welfare_fund_eligible: bool = True
 
 
 class EmployeeCreate(EmployeeBase):
@@ -57,6 +58,7 @@ class EmployeeUpdate(BaseModel):
     status: Optional[str] = None
     pf_eligible: Optional[bool] = None
     esi_eligible: Optional[bool] = None
+    welfare_fund_eligible: Optional[bool] = None
 
 
 class EmployeeOut(EmployeeBase):
@@ -95,6 +97,7 @@ class SalaryRecordOut(BaseModel):
     pf_employer: float
     esi_employee: float
     esi_employer: float
+    welfare_fund_deduction: float
     other_deductions: float
     net_salary: float
     created_at: datetime
@@ -109,6 +112,7 @@ class SalaryReportOut(BaseModel):
     total_salary_paid: float
     total_pf_deducted: float
     total_esi_deducted: float
+    total_welfare_fund_deducted: float
 
 
 class MonthlyPayrollSummaryOut(BaseModel):
@@ -117,6 +121,7 @@ class MonthlyPayrollSummaryOut(BaseModel):
     total_salary_paid: float
     total_pf_deducted: float
     total_esi_deducted: float
+    total_welfare_fund_deducted: float
 
 
 class EmployeeSalaryReportOut(BaseModel):
@@ -125,4 +130,57 @@ class EmployeeSalaryReportOut(BaseModel):
     total_paid: float
     total_pf: float
     total_esi: float
+    total_welfare_fund: float
     records: List[SalaryRecordOut]
+
+
+class WelfareFundConfigCreate(BaseModel):
+    deduction_type: str = Field(default="amount", pattern="^(amount|percentage)$")
+    deduction_value: float = Field(default=0.0, ge=0)
+    is_active: bool = True
+
+
+class WelfareFundConfigUpdate(BaseModel):
+    deduction_type: Optional[str] = Field(default=None, pattern="^(amount|percentage)$")
+    deduction_value: Optional[float] = Field(default=None, ge=0)
+    is_active: Optional[bool] = None
+
+
+class WelfareFundConfigOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    deduction_type: str
+    deduction_value: float
+    is_active: bool
+    created_at: datetime
+
+
+class WelfareFundCalculateRequest(BaseModel):
+    employee_id: int
+    gross_salary: Optional[float] = None
+
+
+class WelfareFundDeductionOut(BaseModel):
+    employee_id: int
+    gross_salary: float
+    deduction_type: str
+    deduction_value: float
+    welfare_fund_deduction: float
+
+
+class EmployeeWelfareFundReportOut(BaseModel):
+    employee_id: int
+    employee_name: str
+    total_welfare_fund: float
+    records: List[SalaryRecordOut]
+
+
+class WelfareFundSummaryOut(BaseModel):
+    total_welfare_fund_deducted: float
+    total_employees: int
+
+
+class MonthlyWelfareFundSummaryOut(BaseModel):
+    month: str
+    total_employees: int
+    total_welfare_fund_deducted: float
