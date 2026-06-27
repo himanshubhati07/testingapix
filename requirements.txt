@@ -1,0 +1,27 @@
+fastapi
+uvicorn
+sqlalchemy
+asyncpg
+<<<<<<< HEAD
+pydantic
+=======
+>>>>>>> origin/main
+python-dotenv
+python-jose
+passlib[bcrypt]
+bcrypt==4.0.1
+<<<<<<< HEAD
+=======
+pydantic
+email-validator
+>>>>>>> origin/main
+greenlet
+pytest
+pytest-asyncio
+httpx
+openpyxl
+python-docx
+<<<<<<< HEAD
+email-validator
+=======
+>>>>>>> origin/main

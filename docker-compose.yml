@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  api:
+    build: .
+    ports:
+<<<<<<< HEAD
+      - "33047:33047"
+    env_file:
+      - .env_c517696b-c1ad-4fbe-ac2d-9f27763c2096
+=======
+      - "56961:56961"
+    env_file:
+      - .env_d3b2dbc6-eb80-47a1-8fc6-6d72dad7f2f6
+>>>>>>> origin/main
